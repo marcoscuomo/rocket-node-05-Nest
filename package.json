@@ -5,7 +5,6 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
-  "type": "module",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -33,6 +32,7 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
+    "vite-tsconfig-paths": "4.2.0",
     "zod": "^3.24.2",
     "zod-validation-error": "^3.4.0"
   },
@@ -57,7 +57,6 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3",
     "unplugin-swc": "^1.5.1",
-    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.0.5"
   }
 }
