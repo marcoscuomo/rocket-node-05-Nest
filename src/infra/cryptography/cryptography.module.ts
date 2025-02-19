@@ -20,6 +20,6 @@ import { HasheGenerator } from '@/domain/forum/application/cryptography/hasher-g
       useClass: BcrypterHasher,
     },
   ],
-  exports: [Encrypter, HashComparer],
+  exports: [Encrypter, HashComparer, HasheGenerator],
 })
 export class CryptographyModule {}
