@@ -5,7 +5,7 @@ export interface CommentProps {
   authorId: UniqueEntityID
   content: string
   createdAt: Date
-  updatedAt?: Date
+  updatedAt?: Date | null
 }
 
 // abstract class => Uma classe que não poderá ser instânciada sozinha, ela deverá ser extentida por outra classe.
