@@ -6,26 +6,29 @@ import { INestApplication } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
+import { AnswerFactory } from 'test/factories/make-answer'
 import { QuestionFactory } from 'test/factories/make-question'
 import { StudentFactory } from 'test/factories/make-student'
 import { waitFor } from 'test/utils/wait-for'
 
-describe('On answer created (E2E)', () => {
+describe('On question best answer chosen (E2E)', () => {
   let app: INestApplication
   let studentFactory: StudentFactory
   let questionFactory: QuestionFactory
+  let answerFactory: AnswerFactory
   let jwt: JwtService
   let prisma: PrismaService
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [StudentFactory, QuestionFactory],
+      providers: [StudentFactory, QuestionFactory, AnswerFactory],
     }).compile()
 
     app = moduleRef.createNestApplication()
     studentFactory = moduleRef.get(StudentFactory)
     questionFactory = moduleRef.get(QuestionFactory)
+    answerFactory = moduleRef.get(AnswerFactory)
     jwt = moduleRef.get(JwtService)
     prisma = moduleRef.get(PrismaService)
 
@@ -34,7 +37,7 @@ describe('On answer created (E2E)', () => {
     await app.init()
   })
 
-  it('should send a notification when answer is created', async () => {
+  it('should send a notification when question best answer is chosen', async () => {
     const user = await studentFactory.makePrismaStudent()
 
     const accessToken = jwt.sign({ sub: user.id.toString() })
@@ -43,25 +46,28 @@ describe('On answer created (E2E)', () => {
       authorId: user.id,
     })
 
-    const questionId = question.id.toString()
+    const answer = await answerFactory.makePrismaAnswer({
+      questionId: question.id,
+      authorId: user.id,
+    })
+
+    const answerId = answer.id.toString()
 
     await request(app.getHttpServer())
-      .post(`/questions/${questionId}/answers`)
+      .patch(`/answers/${answerId}/choose-as-best`)
       .set('Authorization', `Bearer ${accessToken}`)
-      .send({
-        content: 'new answer',
-        attachments: [],
-      })
+      .send()
 
     // Utilizamos o waitFor porque a notificação não é sincrona com o envio da resposta.
     await waitFor(async () => {
+      await prisma.notification.findMany()
       const notificationOnDatabase = await prisma.notification.findFirst({
         where: {
           recipientId: user.id.toString(),
         },
       })
 
-      expect(notificationOnDatabase).not.toBeNull()
+      expect(notificationOnDatabase).toBeNull()
     })
   })
 })
